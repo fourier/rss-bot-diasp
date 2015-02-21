@@ -27,7 +27,6 @@ class BotsDB(object):
   """
   SELECT_ALL_BOTS = "SELECT * FROM rss_bot"
   SELECT_BOT_ID = "SELECT id FROM rss_bot WHERE name = ?"
-  
   def __init__(self, filename):
     self.open(filename)
     
@@ -48,9 +47,7 @@ class BotsDB(object):
     c.execute(BotsDB.SELECT_TABLES)
     result = c.fetchone()
     if result == None:
-      print "Creating rss_bot table"
       c.execute(BotsDB.CREATE_RSS_BOT_TABLE)
-      print "Creating rss_feed_posts table"
       c.execute(BotsDB.CREATE_RSS_FEED_POSTS_TABLE)
 
   def close(self):
@@ -65,6 +62,12 @@ class BotsDB(object):
     c = self.db.cursor()
     c.execute(BotsDB.INSERT_BOT_ENTRY, [name, name, rss_url, pod_url, username, password])
     self.db.commit()
+
+  def has_bot(self, name):
+    c = self.db.cursor()
+    c.execute(BotsDB.SELECT_BOT_ID, [name])
+    result = c.fetchone()
+    return not(result == None)
 
   def print_bots(self):
     """
@@ -92,9 +95,19 @@ class PostDBWrapper(object):
   VALUES (?, ?)
   """
   FIND_POST = "SELECT * FROM rss_feed_posts WHERE rss_bot_id = ? AND post_id = ?"
+  SELECT_BOT_WITH_ID = """
+  SELECT name, rss_url, pod_url, username, password FROM rss_bot
+  WHERE id = ?
+  """
+
   def __init__(self, db, bot_id):
     self.db = db
     self.bot_id = bot_id
+
+  def get_bot(self):
+    c = self.db.cursor()
+    c.execute(PostDBWrapper.SELECT_BOT_WITH_ID, [self.bot_id])
+    return c.fetchone()
 
   def mark_as_posted(self, post_id):
     c = self.db.cursor()
