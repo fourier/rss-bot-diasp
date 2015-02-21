@@ -1,0 +1,3 @@
+[submodule "feedDiasp"]
+	path = feedDiasp
+	url = git@github.com:fourier/feedDiasp.git
