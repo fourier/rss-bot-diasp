@@ -51,7 +51,7 @@ def process_cmdargs():
                       nargs = 1,
                       metavar = 'filename',
                       dest = 'dbfile',
-                      default = DEFAULT_DB_NAME,
+                      default = [DEFAULT_DB_NAME],
                       help = HELP_DB_CMDARG)
   
   args = parser.parse_args()
@@ -61,7 +61,7 @@ def main():
   # process command line arguments
   args = process_cmdargs()
   # open the database
-  db = BotsDB(args.dbfile)
+  db = BotsDB(args.dbfile[0])
 
   # process the add bot command
   if not(args.add_bot == None):
