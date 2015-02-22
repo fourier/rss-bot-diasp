@@ -27,6 +27,11 @@ class BotsDB(object):
   """
   SELECT_ALL_BOTS = "SELECT * FROM rss_bot"
   SELECT_BOT_ID = "SELECT id FROM rss_bot WHERE name = ?"
+  REMOVE_RSS_FOR_BOT = """
+  DELETE FROM rss_feed_posts WHERE rss_bot_id in
+  (SELECT id FROM rss_bot WHERE name = ?)
+  """
+  REMOVE_RSS_BOT = "DELETE FROM rss_bot WHERE name = ?"
   def __init__(self, filename):
     self.open(filename)
     
@@ -61,6 +66,15 @@ class BotsDB(object):
   def add_bot(self, name, rss_url, pod_url, username, password):
     c = self.db.cursor()
     c.execute(BotsDB.INSERT_BOT_ENTRY, [name, name, rss_url, pod_url, username, password])
+    self.db.commit()
+
+  def remove_bot(self, name):
+    if not(self.has_bot(name)):
+      print "Not found bot " + name
+      return
+    c = self.db.cursor()
+    c.execute(BotsDB.REMOVE_RSS_FOR_BOT, [name])
+    c.execute(BotsDB.REMOVE_RSS_BOT, [name])
     self.db.commit()
 
   def has_bot(self, name):

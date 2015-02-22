@@ -21,6 +21,8 @@ pod_url - address of the pod, like https://joindiaspora.com/
 username - name of the user on this pod which will post RSS feed news
 password - password of this user on the pod"""
 
+HELP_REMOVE_CMDARG = "Removes the bot and its data from the database"
+
 HELP_UPDATE_CMDARG = """Updates the bot: download feeds and post them.
 bot_name - name of the bot in the database"""
 
@@ -40,6 +42,10 @@ def process_cmdargs():
                       metavar = ('bot_name','rss_url', 'pod_url', 'username', 'password'),
                       dest = 'add_bot',
                       help = HELP_ADD_CMDARG)
+  group.add_argument("--remove",
+                      metavar = 'bot_name',
+                      dest = 'remove_bot',
+                      help = HELP_REMOVE_CMDARG)
   group.add_argument("--update",
                       metavar = 'bot_name',
                       dest = 'update_bot',
@@ -48,10 +54,9 @@ def process_cmdargs():
                       action="store_true",
                       help = HELP_LIST_CMDARG)
   parser.add_argument("--db",
-                      nargs = 1,
                       metavar = 'filename',
                       dest = 'dbfile',
-                      default = [DEFAULT_DB_NAME],
+                      default = DEFAULT_DB_NAME,
                       help = HELP_DB_CMDARG)
   
   args = parser.parse_args()
@@ -61,7 +66,7 @@ def main():
   # process command line arguments
   args = process_cmdargs()
   # open the database
-  db = BotsDB(args.dbfile[0])
+  db = BotsDB(args.dbfile)
 
   # process the add bot command
   if not(args.add_bot == None):
@@ -74,6 +79,8 @@ def main():
     print "Done"
   elif args.list == True:
     db.print_bots()
+  elif not(args.remove_bot == None):
+    db.remove_bot(args.remove_bot)
   elif not(args.update_bot == None):
     # create wrapper for FeedDiasp
     postdb = db.create_posts_db(args.update_bot)
